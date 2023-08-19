@@ -1,0 +1,197 @@
+substitutions:
+   updinterval: 0.15s
+
+esphome:
+  name: "esphome-wled01"
+  friendly_name: esphome-wledring
+
+
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "bsX4vtDk5Hvbmd2lhrklp0V8a2AxQlXPskzIlqAO+p8="
+
+ota:
+
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esphome-Web-B74D6C"
+    password: "xTGi9nsfjmA9"
+
+light:
+  - platform: fastled_clockless
+    chipset: WS2812B
+    pin: 5
+    num_leds: 12
+    rgb_order: GRB
+    name: "FastLED WS2811 Light"
+    id: my_light
+    effects:
+      - lambda:
+          name: Pulse Special Selected
+          update_interval: $updinterval
+          lambda: |-
+            static float in = 0;
+            static float out = 0;
+            
+            // Scale sin output from -1/1 to 0/1
+            // out = sin(in) * 0.5 + 0.5;  
+            out = (sin(in) * 0.45 + 0.5) * 0.9 + 0.05;            
+  
+            auto call = id(my_light).turn_on();
+            call.set_transition_length(100);
+            // COLOR + BRIGHTNESS
+            float red, green, blue;
+            id(my_light).current_values_as_rgb(&red, &green, &blue);
+            call.set_rgb(red, green, blue);
+            call.set_brightness(out);
+            // Do not publish state to eliminate flooding of logs
+            call.set_publish(false);
+            call.set_save(false);
+            call.perform();
+            // RESOLUTION
+            in += 0.314;
+            if (in > 6.283)
+              in = 0;
+      - lambda:
+          name: Pulse Special Red
+          update_interval: $updinterval
+          lambda: |-
+            static float in = 0;
+            static float out = 0;
+            
+            // Scale sin output from -1/1 to 0/1
+            out = sin(in) * 0.5 + 0.5;  
+  
+            auto call = id(my_light).turn_on();
+            call.set_transition_length(100);
+            // COLOR + BRIGHTNESS
+            call.set_rgb(1.0, 0, 0);
+            call.set_brightness(out);
+            // Do not publish state to eliminate flooding of logs
+            call.set_publish(false);
+            call.set_save(false);
+            call.perform();
+            // RESOLUTION
+            in += 0.314;
+            if (in > 6.283)
+              in = 0;              
+      - lambda:
+          name: Pulse Special Green
+          update_interval: $updinterval
+          lambda: |-
+            static float in = 0;
+            static float out = 0;
+            
+            // Scale sin output from -1/1 to 0/1
+            out = sin(in) * 0.5 + 0.5;  
+  
+            auto call = id(my_light).turn_on();
+            call.set_transition_length(100);
+            // COLOR + BRIGHTNESS
+            call.set_rgb(0, 1.0, 0);
+            call.set_brightness(out);
+            // Do not publish state to eliminate flooding of logs
+            call.set_publish(false);
+            call.set_save(false);
+            call.perform();
+            // RESOLUTION
+            in += 0.314;
+            if (in > 6.283)
+              in = 0;                   
+      - lambda:
+          name: Pulse Special Blue
+          update_interval: $updinterval
+          lambda: |-
+            static float in = 0;
+            static float out = 0;
+            
+            // Scale sin output from -1/1 to 0/1
+            out = sin(in) * 0.5 + 0.5;  
+  
+            auto call = id(my_light).turn_on();
+            call.set_transition_length(100);
+            // COLOR + BRIGHTNESS
+            call.set_rgb(0, 0, 1.0);
+            call.set_brightness(out);
+            // Do not publish state to eliminate flooding of logs
+            call.set_publish(false);
+            call.set_save(false);
+            call.perform();
+            // RESOLUTION
+            in += 0.314;
+            if (in > 6.283)
+              in = 0;                   
+      - pulse:
+      - pulse:
+          name: "Fast Pulse"
+          transition_length: 0.5s
+          update_interval: 0.5s
+          min_brightness: 0%
+          max_brightness: 100%
+      - pulse:
+          name: "Slow Pulse"
+          transition_length: 500ms      # defaults to 1s
+          update_interval: 100ms
+      - strobe:
+      - strobe:
+          name: Strobe Effect With Custom Values
+          colors:
+            - state: true
+              brightness: 100%
+              red: 100%
+              green: 90%
+              blue: 0%
+              duration: 500ms
+            - state: false
+              duration: 250ms
+            - state: true
+              brightness: 100%
+              red: 0%
+              green: 100%
+              blue: 0%
+              duration: 500ms
+      - flicker:
+      - flicker:
+          name: Flicker Effect With Custom Values
+          alpha: 95%
+          intensity: 1.5%
+      - lambda:
+          name: My Custom Effect
+          update_interval: 1s
+          lambda: |-
+            static int state = 0;
+            auto call = id(my_light).turn_on();
+            // Transition of 1000ms = 1s
+            call.set_transition_length(1000);
+            if (state == 0) {
+              call.set_rgb(1.0, 1.0, 1.0);
+            } else if (state == 1) {
+              call.set_rgb(1.0, 0.0, 1.0);
+            } else if (state == 2) {
+              call.set_rgb(0.0, 0.0, 1.0);
+            } else {
+              call.set_rgb(1.0, 0.0, 0.0);
+            }
+            call.perform();
+            state += 1;
+            if (state == 4)
+              state = 0;
+
+
+captive_portal:
+    

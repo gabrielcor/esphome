@@ -1,0 +1,41 @@
+esphome:
+  name: esphome-web-5d437c
+  friendly_name: esphome-reed01
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "pejEnqLjVjTBxHo8K5AL51/luc/0oBeOC69PZ8cTqEk="
+
+ota:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esphome-Web-5D437C"
+    password: "7Q1xKtqnxoOd"
+
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: 5
+      mode:
+        input: true
+        pullup: true
+    name: "reedswitch"
+    device_class: door
+    
+captive_portal:
+    
